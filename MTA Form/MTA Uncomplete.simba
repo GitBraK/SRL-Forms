@@ -1,4 +1,5 @@
 program formTemplate;
+{Had to comment out the Json parsing }
 
 var
   Form: TForm;

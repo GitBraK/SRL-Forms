@@ -9,7 +9,6 @@ end;
 procedure formInit;
 var
   W, H: integer;
-
 begin
   form := TForm.create(nil);
   with form do

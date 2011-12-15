@@ -1,5 +1,7 @@
+program Pharmacuetics;
 {Player Form}
 {Loads of Help from Daniel, Masterkill and dgby714}
+
 type
  TFormPlayer = record
    Name, Pass, Nick, Pin, STAT_ID, STAT_PASS, Bank :String;
