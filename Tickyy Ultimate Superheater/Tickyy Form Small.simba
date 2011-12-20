@@ -1,21 +1,46 @@
 program new;
+
+Type
+  Player = record
+    Name, Password, Nick, Pin :String;
+    Members, ModLog, Soulwars : Boolean;
+    RunTime, BreakTime, AntiBan, MSpeed :Integer;
+  end;
+
 var
   Form: TForm;
   TTS: TTabControl;
   TE: Array[0..7] of TEDIT;
   TBut: Array[0..1] of TBUTTON;
-  CB: Array[0..1] of TCHECKBOX;
   TL: Array[0..10] of TLABEL;
   TCB: array[0..2] of TCOMBOBOX;
   Banner, Hat, TBG: TIMAGE;
   TG: array[0..2] of Tgroupbox;
   TM: TMEMO;
+  TPlayer: Player;
 
 
 procedure Action(Sender: TObject);
 begin
   case Sender of
-    Tbut[0]: Form.MODALRESULT := mrOk;
+    Tbut[0]:begin
+              With TPlayer do
+              begin
+                Name := TE[0].Caption;
+                Password := TE[1].Caption;
+                Nick := TE[2].Caption;
+                Pin := TE[3].Caption;
+                Members := StrToBool(TCB[0].Caption);
+                ModLog := StrToBool(TCB[1].Caption);
+                Soulwars := StrToBool(TCB[2].Caption);
+                RunTime := StrToInt(TE[4].Caption);
+                BreakTime := StrToInt(TE[5].Caption);
+                AntiBan := StrToInt(TE[6].Caption);
+                MSpeed :=  StrToInt(TE[7].Caption);
+
+              end;
+              Form.MODALRESULT := mrOk;
+            end;
     TBut[1]: Form.MODALRESULT := mrCancel;
   end;
 end;
@@ -33,6 +58,8 @@ begin
     GetClientDimensions(W, H);
     SetBounds(((W / 2) - 275),((H/2) - 170), 420, 340);
     BORDERSTYLE := bsNone;
+    FONT.Name := 'Times New Roman';
+    FONT.Size := 10;
   end;
 
 {---------------------------------- TGroupBoxes -------------------------------}
@@ -140,12 +167,12 @@ begin
   with TBG do
   begin
     Parent := Form;
-    Width := 550;
+    Width := 420;
     Height := 340;
     Top := 0;
     Left := 0;
   end;
-  B := LoadBitmap(ScriptPath + 'BackGround.bmp');
+  B := LoadBitmap(ScriptPath + 'BackGround2.bmp');
   GetBitmapSize(B, W, H);
   DrawBitmap(B,TBG.CANVAS,0,0);
   FreeBitmap(b);
@@ -158,7 +185,7 @@ begin
     Width := 394;
     Height := 91;
     Top := 10;
-    Left := 7;
+    Left := 18;
   end;
 
   B := LoadBitmap(ScriptPath + 'TGxgP.jpg');
