@@ -1,0 +1,205 @@
+program new;
+var
+  Form: TForm;
+  TTS: TTabControl;
+  TE: Array[0..7] of TEDIT;
+  TBut: Array[0..1] of TBUTTON;
+  CB: Array[0..1] of TCHECKBOX;
+  TL: Array[0..10] of TLABEL;
+  TCB: TCOMBOBOX;
+  Banner, Hat, TBG: TIMAGE;
+  TG: array[0..2] of Tgroupbox;
+
+
+procedure Action(Sender: TObject);
+begin
+  case Sender of
+    Tbut[0]: Form.MODALRESULT := mrOk;
+    TBut[1]: Form.MODALRESULT := mrCancel;
+  end;
+end;
+
+procedure formInit;
+var
+  I, W, H, B: integer;
+  TempAr: array[0..3] of TIntegerArray;
+  TempArr: TStringArray;
+begin
+  form := TForm.create(nil);
+  with form do
+  begin
+    caption := 'Form Template';
+    GetClientDimensions(W, H);
+    SetBounds(((W / 2) - 275),((H/2) - 170), 550, 340);
+    BORDERSTYLE := bsNone;
+  end;
+
+{---------------------------------- TGroupBoxes -------------------------------}
+  TempAr[0] := [190,200,130];
+  TempAr[1] := [180,180,180];
+  TempAr[2] := [105,105,105];
+  TempAr[3] := [10,205,410];
+  TempArr := ['Player Setup','Script Setup','Info Box'];
+
+  for I := 0 to 2 do
+  begin
+    TG[i]:= TGROUPBOX.Create(Form);
+    with TG[i] do
+    begin
+      Parent := Form;
+      Width :=TempAr[0][i];
+      Height :=TempAr[1][i];
+      Top := TempAr[2][i];
+      Left := TempAr[3][i];
+      CAPTION := TempArr[i];
+    end;
+  end;
+
+{------------------------------------- TLabels --------------------------------}
+
+
+  TempArr := ['Username','Password','Nick','Pin','Members','Run Time','Break Time'
+              ,'AntiBan %','Mouse Speed','Mod Logout','Soul Wars Bank'];
+  for I := 0 to 10 do
+  begin
+    TL[i]:= Tlabel.Create(Form);
+    with TL[i] do
+    begin
+      if InIntArray([0,1,2,3,4], i) then
+        Parent := TG[0]
+      else
+        Parent := TG[1];
+      Left := 10;
+      Top := i * 28 + 5;
+      if InIntArray([5,6,7,8,9,10], i) then
+        Top := (i - 5) * 28 + 5;
+
+      Caption := TempArr[i];
+
+    end;
+  end;
+{---------------------------------- TEdits ------------------------------------}
+  TempAr[0] := [200,200,100];
+  TempAr[1] := [300,300,300];
+  TempArr := ['User Name','Password','Nick', 'Pin','99','5'
+              ,'25','17'];
+
+  for I := 0 to 7 do
+  begin
+    TE[i] := Tedit.Create(form);
+    with TE[i] do
+    begin
+      if InIntArray([0,1,2,3], i) then
+      begin
+        Parent := TG[0];
+        Top := I * 28 + 1;
+      end else
+      begin
+        Parent := TG[1];
+        Top := (I - 4) * 28 + 1;
+      end;
+    Left := 100;
+    Caption := TempArr[i];
+    end;
+  end;
+{--------------------------------- TcomboBox ----------------------------------}
+  TCB := TCOMBOBOX.Create(form);
+  with TCB do
+  begin
+    Parent := TG[0];
+    Top := 115;
+    Left := 100;
+    ITEMS.Add('True');
+    Items.Add('False');
+    Width := 80;
+    Caption := 'True';
+  end;
+
+{---------------------------------- TButton -----------------------------------}
+  TempArr := ['Start', 'Stop'];
+  for I := 0 to 1 do
+  begin
+    TBut[i] := TBUTTON.Create(Form);
+    with TBut[i] do
+    begin
+      Parent := Form;
+      Top := 300;
+      Left := i * 100 + 20;
+      Caption := Temparr[i];
+      ONCLICK := @Action;
+    end;
+  end;
+
+{----------------------------------- TImage -----------------------------------}
+  TBG := TIMAGE.Create(Form);
+  with TBG do
+  begin
+    Parent := Form;
+    Width := 550;
+    Height := 340;
+    Top := 0;
+    Left := 0;
+  end;
+  B := LoadBitmap(ScriptPath + 'BackGround.bmp');
+  GetBitmapSize(B, W, H);
+  DrawBitmap(B,TBG.CANVAS,0,0);
+  FreeBitmap(b);
+
+  Banner := TIMAGE.Create(Form);
+  with Banner do
+  begin
+    Parent := Form;
+
+    Width := 429;
+    Height := 91;
+    Top := 10;
+    Left := 10;
+  end;
+
+  B := LoadBitmap(ScriptPath + 'TGxgP.jpg');
+  GetBitmapSize(B, W, H);
+  DrawBitmap(B, Banner.CANVAS,0,0);
+  FreeBitmap(b);
+
+
+  Hat := TIMAGE.Create(Form);
+  with Hat do
+  begin
+    Parent := Form;
+    Width := 95;
+    Height := 90;
+    Top := 10;
+    Left := 445;
+  end;
+  B := LoadBitmap(ScriptPath + 'Magic.gif');
+  GetBitmapSize(B, W, H);
+  DrawBitmap(B,Hat.CANVAS,0,0);
+  FreeBitmap(b);
+
+  form.showModal;
+end;
+
+procedure formSafeCall(proc: string);
+var
+  v: TVariantArray;
+begin
+  setLength(v, 0);
+  threadSafeCall(proc, v);
+end;
+
+procedure formFree();
+begin
+  Form.Free();
+end;
+
+
+begin
+  clearDebug();
+  try
+    formSafeCall('formInit');
+  except
+    writeln(exceptionToString(exceptionType, exceptionParam));
+  finally
+    formSafeCall('formFree');
+  end;
+end.

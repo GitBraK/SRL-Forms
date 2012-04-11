@@ -1,0 +1,47 @@
+program new;
+var
+  Form: TForm;
+
+procedure Action(Sender: TObject);
+begin
+end;
+
+procedure formInit;
+var
+  W, H: integer;
+begin
+  form := TForm.create(nil);
+  with form do
+  begin
+    caption := 'Form Template';
+    GetClientDimensions(W, H);
+    SetBounds(((W / 2) - 290),((H / 2) - 220), 590, 440);
+  end;
+
+  form.showModal;
+end;
+
+procedure formSafeCall(proc: string);
+var
+  v: TVariantArray;
+begin
+  setLength(v, 0);
+  threadSafeCall(proc, v);
+end;
+
+procedure formFree();
+begin
+  Form.Free();
+end;
+
+
+begin
+  clearDebug();
+  try
+    formSafeCall('formInit');
+  except
+    writeln(exceptionToString(exceptionType, exceptionParam));
+  finally
+    formSafeCall('formFree');
+  end;
+end.

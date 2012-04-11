@@ -1,0 +1,410 @@
+program formTemplate;
+{Had to comment out the Json parsing }
+
+var
+  Form: TForm;
+  MyGroup: Array [0..5] of TGROUPBOX;
+  CBArenas: Array [0..3] of TCheckbox;
+  Data: Array [0..10] of TEDIT;
+  Select: Array [0..3] of TCOMBOBOX;
+  TIA, BG: TIMAGE;
+  Lab: Array [0..3] of TLABEL;
+  But: Array [0..4] of TBUTTON;
+  Saved: Boolean;
+  FTime: TTIMER;
+  Cur: Integer;
+
+{function PullStats(Script: Integer):TIntegerArray;
+var
+  JSONCrapAPI: TStringArray;
+  Stats: TIntegerArray;
+  I: Integer;
+begin
+  JSONCrapAPI := Explode('[',GetPage('http://stats.villavu.com/api/script/' + Inttostr(Script)));
+ SetArrayLength(Stats, High(JSONCrapAPI));
+  For I:= 2 to High(JSONCrapAPI) do
+    Stats[(i - 2)] := StrToInt(Between('    ', ', ', JSONCrapAPI[i]));
+  Result := Stats;
+end;
+
+function StatsLastCommitBy(Script: Integer):String;
+Var
+  TempAr: TStringArray;
+  I: integer;
+begin
+  TempAr := Explode('last_commit_by:":', GetPage('http://stats.villavu.com/api/script/' + Inttostr(Script)));
+  for I := 0 to High(TempAr) do
+    Result := (between('"', '"', TempAr[i]));
+end;
+
+function StatsTime(Script: Integer):Integer;
+Var
+  TempAr: TStringArray;
+
+begin
+  TempAr := Explode('"time":', GetPage('http://stats.villavu.com/api/script/' + Inttostr(Script)));
+  SetArrayLength(TempAr, High(TempAr)+ 1);
+    Result:= StrToInt(between(' ', ',', (TempAr[1])));
+end;
+
+function Time(Script: Integer): TIntegerArray;
+Var
+  TempAr, TempArr: TIntegerArray;
+  TempSAr: TStringArray;
+  I: Integer;
+begin
+  SetArrayLength(TempAr, 5);
+  TempSAr := Explode('"time":', GetPage('http://stats.villavu.com/api/script/' + Inttostr(Script)));
+  SetArrayLength(TempSAr, High(TempSAr)+ 1);
+  TempAr[0] := StrToInt(between(' ', ',', (TempSAr[1])));
+  TempArr := [60, 24, 7, 52];
+  for I := 0 to 3 do
+  begin
+    while (TempAr[i] > 0) do
+    begin
+      if (TempAr[i] < TempArr[i]) then
+        Break;
+      Inc(TempAR[i + 1]);
+      DecEx(TempAR[i], Temparr[i]);
+    end;
+  end;
+  Result := TempAr;
+end;               }
+
+procedure Action(Sender: TObject);
+var
+  I, W, H: Integer;
+  TempAr: T2DIntegerArray;
+  Temp: String;
+
+begin
+  case Sender of
+  CBArenas[0]: if CBArenas[0].CHECKED then
+               begin
+                 Data[7].Parent := MyGroup[1];
+                 Data[7].Visible := True;
+                 Select[1].Parent := MyGroup[1];
+                 Select[1].Visible := True;
+                 Lab[0].Visible := True;
+               end else
+               begin
+                 Select[1].Visible := False;
+                 Data[7].Visible := False;
+                 Lab[0].Visible := False;
+               end;
+
+  CBArenas[1]: if CBArenas[1].CHECKED then
+               begin
+                 Data[8].Parent := MyGroup[1];
+                 Data[8].Visible := True;
+                 Select[2].Parent := MyGroup[1];
+                 Select[2].Visible := True;
+                 Lab[1].Visible := True;
+               end else
+               begin
+                 Lab[1].Visible := False;
+                 Select[2].Visible := False;
+                 Data[8].Visible := False;
+               end;
+
+  CBArenas[2]: if CBArenas[2].CHECKED then
+               begin
+                 Data[9].Parent := MyGroup[1];
+                 Data[9].Visible := True;
+                 Select[3].Parent := MyGroup[1];
+                 Select[3].Visible := True;
+                 Lab[2].Visible := True;
+               end else
+               begin
+                 Select[3].Visible := False;
+                 Data[9].Visible := False;
+                 Lab[2].Visible := False;
+               end;
+
+  CBArenas[3]: if CBArenas[3].CHECKED then
+               begin
+                 Data[10].Parent := MyGroup[1];
+                 Data[10].Visible := True;
+               end else
+                 Data[10].Visible := False;
+
+  But[0]:  begin //Reset Fields
+             for I := 0 to 10 do
+               Data[i].TEXT := '';
+             for I := 0 to 3 do
+               Select[i].TEXT := '';
+             for I := 0 to 3 do
+               CBArenas[i].CHECKED := False;
+           end;
+
+  But[1]:  begin //Load Fields
+             for I := 0 to 10 do
+               Data[i].TEXT := ReadINI('Data', IntToStr(i), ScriptPath + 'Player Data.txt');
+             for I := 0 to 3 do
+             Begin
+               Temp := ReadINI('Select', IntToStr(i), ScriptPath + 'Player Data.txt');
+               If not(Temp = '') then
+                 Select[i].TEXT := Temp;
+             end;
+             for I := 0 to 3 do
+             begin
+               Temp := ReadINI('CBArenas', IntToStr(i), ScriptPath + 'Player Data.txt');
+               if not(Temp = '') then
+                 CBArenas[i].CHECKED := StrToBool(Temp);
+             end;
+             Saved := true;
+           end;
+  But[2]:  begin //Save Fields
+             for I := 0 to 10 do
+               WriteINI('Data', IntToStr(i), Data[i].TEXT,  ScriptPath + 'Player Data.txt');
+             for I := 0 to 3 do
+               WriteINI('Select', IntToStr(i), Select[i].TEXT, ScriptPath + 'Player Data.txt');
+             for I := 0 to 3 do
+               WriteINI('CBArenas', IntToStr(i), BoolToStr(CBArenas[i].CHECKED), ScriptPath + 'Player Data.txt');
+           end;
+  But[3]:  Form.ModalResult:= mrOk;//Start Script
+  But[4]:begin //Exit Script
+           if Saved then
+           begin
+             Form.ModalResult:= mrCancel;
+             exit;
+           end;
+           if (MessageDlg('Exit Form','Are you sure you wish to Exit without Saving?',mtWarning, [mbYes, mbNo]) = 6) then
+             Form.ModalResult:= mrCancel;
+         end;
+
+  FTime, Form: begin
+           Inc(Cur);
+           BG := TIMAGE.Create(Form);
+           with BG do
+           begin
+             Parent := Form;
+             Width := 500;
+             Height := 100;
+             Top := 5;
+             Left := 45;
+           end;
+           I := BitmapFromString(500,100, DecompressString(Base64Decode(ReadINI('Images', IntToStr(Cur), ScriptPath + 'Player Data.txt'))));
+           getbitmapsize(I, w, h);
+           DrawBitmap(I,BG.CANVAS,0,0);
+           FreeBitmap(I);
+           if Cur = 4 then Cur := 0;
+         end;
+
+  end;
+  if CBArenas[0].CHECKED or CBArenas[1].CHECKED or CBArenas[2].CHECKED then
+    Lab[3].Visible := true
+  else
+    Lab[3].Visible := false;
+end;
+
+procedure formInit;
+var
+  I, II, IIII, W, H: Integer;
+  TempAr: Array [0..3] of TIntegerArray;
+  TempArr: Array [0..3] of TStringArray;
+
+
+begin
+  form := TForm.create(nil);
+  with form do
+  begin
+    caption := 'Form Template';
+    GetClientDimensions(W, H);
+    SetBounds(((W / 2) - 290),((H / 2) - 220), 590, 440);
+    BORDERSTYLE := bsNone;
+    ONACTIVATE := @Action;
+  end;
+{------------------------------- Form TGroupBox -------------------------------}
+
+  TempAr[0] := [5, 190, 5, 5, 395, 395];//Left
+  TempAr[1] := [5, 5, 145, 225, 5, 155];//Top
+  TempAr[2] := [180, 200, 180,180, 180, 180];//W
+  TempAR[3] := [140, 300, 80, 80, 150, 150];//H
+  TempArr[0] := ['User Setup', 'Script Setup', 'Smart Setup', 'Stat Setup', 'Global Stats', 'Personal Stats'];
+  for I := 0 to 5 do
+  begin
+    MyGroup[i]:= TGROUPBOX.Create(Form);
+    with  MyGroup[i] do
+    begin
+      Parent := Form;
+      SetBounds(TempAR[0][i], 100 + TempAR[1][i], TempAR[2][i], TempAR[3][i]);
+      //CAPTION := TempArr[0][i];
+      if InIntArray([4], I) then
+      begin
+        Hint := 'Your name could be up here Register for Stats TODAY!';
+        ShowHint := True;
+      end;
+    end;
+  end;
+
+{------------------------------- Forms TLabels --------------------------------}
+
+  TempAr[0] :=[8,  38, 68, 98,  8, 38, 68, 98,    8, 38, 8, 38, 8, 28, 48, 68,
+              88, 108,  8, 28, 48, 68, 88, 108, 163, 193, 223, 128];
+  TempAr[1] :=[5,   5,  5,  5,  5,  5,  5,   5,   5,  5, 5,  5, 5,  5,  5,  5,
+               5,   5,  5,  5,  5,  5,  5, 5, 20, 26, 31, 55];
+  //TempAr[2] := PullStats(145);
+  TempArr[0] := ['Username', 'Password', 'Pin', 'Nick', 'Graveyard', '  Alchemy',
+              '    Enchant', '         Maze', 'World', 'Signed',
+              'Stats ID', 'Stats Pass', 'Last Commit By', 'Total EXP Gained',
+              'Alchemy Points', 'Enchant Points', 'Graveyard Points',
+              'Maze Points',  'Total EXP Gained', 'Alchemy Points',
+              'Enchant Points', 'Graveyard Points', 'Maze Points', 'Time Running',
+              'Graveyard', 'Alchemy', 'Enchant', 'Spell Selection'];
+  for I := 0 to 23 do
+  begin
+    with TLabel.Create(Form) do
+    begin
+      Top := TempAr[0][i];
+      Left := TempAr[1][i];
+      Caption := TempArr[0][I] + ': ';
+      FONT.Color := clWhite;
+      Case I of
+      //12: CAPTION := TempArr[0][I] + ': ' + StatsLastCommitBy(145);
+      13, 14,15,16,17: Caption := TempArr[0][I] + ':  ' + IntToStr(TempAr[2][i - 13]);
+      end;
+      Case I of
+      0, 1, 2, 3: Parent := MyGroup[0];
+      4, 5, 6, 7: Parent := MyGroup[1];
+      8, 9: Parent := MyGroup[2];
+      10, 11: Parent := MyGroup[3];
+      12, 13, 14, 15, 16, 17: Parent := MyGroup[4];
+      18, 19, 20, 21, 22, 23: Parent := MyGroup[5];
+      end;
+    end;
+  end;
+
+  for I := 0 to 3 do
+  begin
+    Lab[i] := TLABEL.Create(Form);
+    with Lab[i] do
+    begin
+      FONT.Color := clWhite;
+      Parent:= Mygroup[1];
+      Top:= TempAr[0][i + 24];
+      Left := TempAr[1][i + 24];
+      if I = 27 then
+        Caption := TempArr[0][I + 24]
+      else
+        Caption := TempArr[0][I + 24] + ': ';
+      Visible := False;
+    end;
+  end;
+{------------------------------- Forms TEdits ---------------------------------}
+  TempAr[0]:= [ 70, 70, 70, 70, 70, 70, 70, 100, 100, 100, 100];//Left
+  TempAr[1]:= [  5, 35, 65, 95,  5,  5, 35,  5, 35, 65, 95];//Top
+  TempAr[2]:= [100,100,100,100,100,100,100, 50, 50, 50, 50];//Width
+  TempAr[3]:= [ 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20];//Height
+  TempArr[0] := ['Fill in you runescape Username.', 'Fill in your Runescape Password.', 'Fill in your Bank Pin number', '3-4 digits of your Runescape Screen Name. Not to be confused with Username.','','','','','','',''];//TEdits
+  for I := 0 to 10 do
+  begin
+    Data[i] := TEDIT.Create(Form);
+    with Data[i] do
+    begin
+      Hint := TempArr[0][i];
+      ShowHint := True;
+      SetBounds(TempAr[0][i], TempAr[1][i], TempAr[2][i], TempAr[3][i]);
+      case I of
+        0, 1, 2, 3: Parent := MyGroup[0];
+        4: Parent := Mygroup[2];
+        5, 6: Parent := MyGroup[3];
+      end;
+    end;
+  end;
+
+  for I := 0 to 3 do
+  begin
+    CBArenas[i] := TCHECKBOX.Create(Form);
+    with CBArenas[i] do
+    begin
+      Hint := 'Check the Box to  use this Arena.';
+      ShowHint := True;
+      Parent := MyGroup[1];
+      Left := 70;
+      Top := 7 + (I * 30);
+      ONCLICK := @Action;
+    end;
+  end;
+
+  TempArr[0] := ['True', 'False'];
+  TempArr[1] := ['Auto', 'Bones to Bananas', 'Bones to Peaches'];
+  TempArr[2] := ['Auto', 'High Level Alchemy', 'Low Level Alchemy'];
+  TempArr[3] := ['Auto', 'lvl-1 Enchant', 'lvl-2 Enchant', 'lvl-3 Enchant', 'lvl-4 Enchant', 'lvl-5 Enchant' ,'lvl-6 Enchant'];
+  for I := 0 to 3 do
+  begin
+    Select[i] := TCOMBOBOX.Create(Form);
+    with Select[i] do
+    begin
+      for II := 0 to high(TempArr[i]) do
+        ITEMS.Add(TempArr[i][ii]);
+      Case I of
+      0: begin
+           Parent := MyGroup[2];
+           SetBounds(70,35,100, 20);
+           Caption := 'True';
+         end;
+      1,2,3: SetBounds(90, (130 + (I * 30)), 100, 20);
+      end;
+    end;
+  end;
+
+  TempArr[0] := ['Reset', 'Load', 'Save', 'Start', 'Exit']
+  for i := 0 to 4 do
+  begin
+    But[i] := TBUTTON.Create(form);
+    with But[i] do
+    begin
+      Parent := Form;
+      SetBounds((140 + (i * 90)), 410, 80, 25);
+      CAPTION := TempArr[0][i];
+      ONCLICK := @Action;
+    end;
+  end;
+
+  TIA := TIMAGE.Create(Form);
+  with TIA do
+  begin
+    Parent := Form;
+    Width := 590;
+    Height := 440;
+    Top := 0;
+    Left := 0;
+  end;
+  IIII := BitmapFromString(590,440, DecompressString(Base64Decode(ReadINI('Images', 'Back', ScriptPath + 'Player Data.txt'))));
+  getbitmapsize(IIII, w, h);
+  DrawBitmap(IIII,TIA.CANVAS,0,0);
+  FreeBitmap(IIII);
+
+  FTime:= TTIMER.Create(Form);
+  FTime.ENABLED := true;
+  FTime.INTERVAL := 3000;
+  FTime.ONTIMER := @Action;
+
+  form.showModal;
+end;
+
+procedure formSafeCall(proc: string);
+var
+  v: TVariantArray;
+begin
+  setLength(v, 0);
+  threadSafeCall(proc, v);
+end;
+
+procedure formFree();
+begin
+  Form.Free();
+end;
+
+
+begin
+  clearDebug();
+  try
+    formSafeCall('formInit');
+  except
+    writeln(exceptionToString(exceptionType, exceptionParam));
+  finally
+    formSafeCall('formFree');
+  end;
+end.
