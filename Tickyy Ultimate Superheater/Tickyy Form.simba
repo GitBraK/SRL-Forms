@@ -1,21 +1,94 @@
 program new;
+
+Type
+  FPlayer = record
+    Name, Password, Nick, Pin, Item, Location :String;
+    Members, ModLog, Soulwars :Boolean;
+    RunTime, BreakLength, BreakWhen, AntiBan, MSpeed :Integer;
+  end;
+
 var
   Form: TForm;
   TTS: TTabControl;
-  TE: Array[0..7] of TEDIT;
-  TBut: Array[0..1] of TBUTTON;
-  CB: Array[0..1] of TCHECKBOX;
-  TL: Array[0..10] of TLABEL;
-  TCB: TCOMBOBOX;
+  TE: Array[0..8] of TEDIT;
+  TBut: Array[0..3] of TBUTTON;
+  TL: Array[0..12] of TLABEL;
+  TCB: array[0..3] of TCOMBOBOX;
   Banner, Hat, TBG: TIMAGE;
   TG: array[0..2] of Tgroupbox;
+  TFPlayer: FPlayer;
 
+Procedure SaveButton;
+begin//Save Button
+  if not DirectoryExists( AppPath + 'Saved Data') then
+    CreateDirectory(AppPath + 'Saved Data');
+  WriteINI('Player', 'Name', TE[0].Caption, AppPath + 'Saved Data\Tickyy Super Heater.ini');// Username
+  WriteINI('Player', 'Pass', TE[1].Caption, AppPath + 'Saved Data\Tickyy Super Heater.ini');// Password
+  WriteINI('Player', 'Nick', TE[2].Caption, AppPath + 'Saved Data\Tickyy Super Heater.ini');// Nick
+  WriteINI('Player', 'Pin', TE[3].Caption, AppPath + 'Saved Data\Tickyy Super Heater.ini'); // Bank Pin
+  WriteINI('Player', 'Members', TCB[0].Caption, AppPath + 'Saved Data\Tickyy Super Heater.ini');//Members
+  WriteINI('Player', 'Mod', TCB[2].Caption, AppPath + 'Saved Data\Tickyy Super Heater.ini');//Mod Logout
+  WriteINI('Player', 'Runtime', TE[4].Caption, AppPath + 'Saved Data\Tickyy Super Heater.ini');//Run Time
+  WriteINI('Player', 'BreakWhen', TE[5].Caption, AppPath + 'Saved Data\Tickyy Super Heater.ini');//When To Break
+  WriteINI('Player', 'BreakLength', TE[6].Caption, AppPath + 'Saved Data\Tickyy Super Heater.ini');//Break Length
+  WriteINI('Player', 'AntiBan', TE[7].Caption, AppPath + 'Saved Data\Tickyy Super Heater.ini');//AntiBan Percent
+  WriteINI('Player', 'MSpeed', TE[8].Caption, AppPath + 'Saved Data\Tickyy Super Heater.ini');//Mouse Speed
+  WriteINI('Player', 'Item', TCB[1].Caption, AppPath + 'Saved Data\Tickyy Super Heater.ini');//Item
+  WriteINI('Player', 'Location', TCB[3].Caption, AppPath + 'Saved Data\Tickyy Super Heater.ini');//Location - Saves Soulwars and Banks
+end;
+
+procedure LoadButton;
+begin
+  if not DirectoryExists(AppPath + 'Saved Data') or not FileExists(AppPath + 'Saved Data\Tickyy Super Heater.ini') then
+    exit;
+  TE[0].Caption := ReadINI('Player', 'Name', AppPath + 'Saved Data\Tickyy Super Heater.ini');// Username
+  TE[1].Caption := ReadINI('Player', 'Pass', AppPath + 'Saved Data\Tickyy Super Heater.ini');// Password
+  TE[2].Caption := ReadINI('Player', 'Nick', AppPath + 'Saved Data\Tickyy Super Heater.ini');// Nick
+  TE[3].Caption := ReadINI('Player', 'Pin', AppPath + 'Saved Data\Tickyy Super Heater.ini'); // Bank Pin
+  TCB[0].Caption := ReadINI('Player', 'Members', AppPath + 'Saved Data\Tickyy Super Heater.ini');//Members
+  TCB[2].Caption := ReadINI('Player', 'Mod', AppPath + 'Saved Data\Tickyy Super Heater.ini');//Mod Logout
+  TE[4].Caption := ReadINI('Player', 'Runtime', AppPath + 'Saved Data\Tickyy Super Heater.ini');//Run Time
+  TE[5].Caption := ReadINI('Player', 'BreakWhen', AppPath + 'Saved Data\Tickyy Super Heater.ini');//When To Break
+  TE[6].Caption := ReadINI('Player', 'BreakLength', AppPath + 'Saved Data\Tickyy Super Heater.ini');//Break Length
+  TE[7].Caption := ReadINI('Player', 'AntiBan', AppPath + 'Saved Data\Tickyy Super Heater.ini');//AntiBan Percent
+  TE[8].Caption := ReadINI('Player', 'MSpeed', AppPath + 'Saved Data\Tickyy Super Heater.ini');//Mouse Speed
+  TCB[1].Caption := ReadINI('Player', 'Item', AppPath + 'Saved Data\Tickyy Super Heater.ini');//Item
+  TCB[3].Caption := ReadINI('Player', 'Location', AppPath + 'Saved Data\Tickyy Super Heater.ini');//Location - Saves Soulwars and Banks
+end;
 
 procedure Action(Sender: TObject);
 begin
+  With TFPlayer do //Populates Tplayer after any button press.
+  begin
+    Name := TE[0].Caption;
+    Password := TE[1].Caption;
+    Nick := TE[2].Caption;
+    Pin := TE[3].Caption;
+    Members := StrToBool(TCB[0].Caption);
+    ModLog := StrToBool(TCB[2].Caption);
+    RunTime := StrToInt(TE[4].Caption);
+    BreakWhen := StrToInt(TE[5].Caption);
+    BreakLength := StrToInt(TE[6].Caption);
+    AntiBan := StrToInt(TE[7].Caption);
+    MSpeed :=  StrToInt(TE[8].Caption);
+    Item := TCB[1].Caption;
+    If TCB[3].Caption = 'Soul Wars' then
+      Soulwars := True
+    else
+      Location := TCB[3].Caption;
+  end;
+
   case Sender of
-    Tbut[0]: Form.MODALRESULT := mrOk;
-    TBut[1]: Form.MODALRESULT := mrCancel;
+    TBut[0] : begin
+                Form.MODALRESULT := mrOk;// Start button
+                SaveButton;
+              end;
+
+    TBut[1] : Form.MODALRESULT := mrCancel;// Exit Button
+
+    TBut[2] : SaveButton;
+
+    TBut[3] : LoadButton;
   end;
 end;
 
@@ -23,25 +96,28 @@ procedure formInit;
 var
   I, W, H, B: integer;
   TempAr: array[0..3] of TIntegerArray;
-  TempArr: TStringArray;
+  TempArr, HintArr: TStringArray;
 begin
   form := TForm.create(nil);
   with form do
   begin
     caption := 'Form Template';
     GetClientDimensions(W, H);
-    SetBounds(((W / 2) - 275),((H/2) - 170), 550, 340);
+    SetBounds(((W / 2) - 275),((H/2) - 170), 420, 365);
     BORDERSTYLE := bsNone;
+    FONT.Name := 'Times New Roman';
+    FONT.Size := 10;
+    ShowHint := true;
   end;
 
 {---------------------------------- TGroupBoxes -------------------------------}
-  TempAr[0] := [190,200,130];
-  TempAr[1] := [180,180,180];
-  TempAr[2] := [105,105,105];
-  TempAr[3] := [10,205,410];
-  TempArr := ['Player Setup','Script Setup','Info Box'];
+  TempAr[0] := [190,200];
+  TempAr[1] := [160,245];
+  TempAr[2] := [105,105];
+  TempAr[3] := [12,208];
+  TempArr := ['Player Setup','Script Setup'];
 
-  for I := 0 to 2 do
+  for I := 0 to 1 do
   begin
     TG[i]:= TGROUPBOX.Create(Form);
     with TG[i] do
@@ -54,37 +130,34 @@ begin
       CAPTION := TempArr[i];
     end;
   end;
-
 {------------------------------------- TLabels --------------------------------}
-
-
-  TempArr := ['Username','Password','Nick','Pin','Members','Run Time','Break Time'
-              ,'AntiBan %','Mouse Speed','Mod Logout','Soul Wars Bank'];
-  for I := 0 to 10 do
+  TempArr := ['Username','Password','Nick','Pin','Members','Total Run Time','Break Time' //Labels In order
+              ,'Break Amount','AntiBan %','Mouse Speed','Metal to Smelt','Mod Logout'
+              ,'Which Bank?'];
+  for I := 0 to 12 do
   begin
     TL[i]:= Tlabel.Create(Form);
     with TL[i] do
     begin
       if InIntArray([0,1,2,3,4], i) then
+      begin
         Parent := TG[0]
-      else
+        Top := i * 28 + 5;
+      end else
+      begin
         Parent := TG[1];
-      Left := 10;
-      Top := i * 28 + 5;
-      if InIntArray([5,6,7,8,9,10], i) then
         Top := (i - 5) * 28 + 5;
-
+      end;
+      Left := 10;
       Caption := TempArr[i];
-
     end;
   end;
 {---------------------------------- TEdits ------------------------------------}
   TempAr[0] := [200,200,100];
   TempAr[1] := [300,300,300];
-  TempArr := ['User Name','Password','Nick', 'Pin','99','5'
-              ,'25','17'];
-
-  for I := 0 to 7 do
+  TempArr := ['User Name','Password','Nick', 'Pin','99','5' ,'25','25','17'];  //Script defualts go Here.
+  HintArr := ['In-game Username.', 'In-game Password.', '3-4 Letters of your in game Username. Example Hero would use "ero" for nick.', 'In-game Pin', 'How long should the script run (minutes)','Breaks after the selected minutes + a RandomRange of 5-15.','Break time + a RandomRange of 1-10.','Antiban Percent, More Percent means less antiban.','Mouse speed, 17 is default.'];
+  for I := 0 to 8 do
   begin
     TE[i] := Tedit.Create(form);
     with TE[i] do
@@ -98,33 +171,92 @@ begin
         Parent := TG[1];
         Top := (I - 4) * 28 + 1;
       end;
+    if InIntArray([1,3], i) then
+      PASSWORDCHAR := '*';
+    Hint := HintArr[i];
     Left := 100;
     Caption := TempArr[i];
     end;
   end;
 {--------------------------------- TcomboBox ----------------------------------}
-  TCB := TCOMBOBOX.Create(form);
-  with TCB do
+  HintArr := ['Are you a member?', 'What to SuperHeat? (bronze, iron, steel, mith, addy, rune)', 'Logout if Mod was found?', 'What Bank are you using?'];
+  for I := 0 to 3 do
   begin
-    Parent := TG[0];
-    Top := 115;
-    Left := 100;
-    ITEMS.Add('True');
-    Items.Add('False');
-    Width := 80;
-    Caption := 'True';
+    TCB[i] := TCOMBOBOX.Create(form);
+    with TCB[i] do
+    begin
+      Parent := TG[0];
+      Hint := HintArr[i];
+      Top := 113;
+      Left := 100;
+      if inintarray([1,2,3], i) then
+      begin
+        Parent := TG[1];
+        Top := I * 28 + 113;
+        Height := 18;
+      end;
+      Case I of
+        0, 2 : begin
+                 ITEMS.Add('True');
+                 ITEMS.Add('False');
+                 Caption := 'True';  //Default Option for Mod and Members
+               end;
+        1 :
+        begin
+          ITEMS.Add('bronze');
+          ITEMS.Add('iron');
+          ITEMS.Add('steel');
+          ITEMS.Add('mithril');
+          ITEMS.Add('adamant');
+          ITEMS.Add('runite');
+          Caption := 'steel'; //Default Metal
+        end;
+        3 :
+          begin
+            ITEMS.Add('Soul Wars');
+            ITEMS.Add('feb');
+            ITEMS.Add('fwb');
+            ITEMS.Add('veb');
+            ITEMS.Add('vwb');
+            ITEMS.Add('db');
+            ITEMS.Add('akb');
+            ITEMS.Add('eb');
+            ITEMS.Add('lb');
+            ITEMS.Add('ctb');
+            ITEMS.Add('clt');
+            ITEMS.Add('nab');
+            ITEMS.Add('sab');
+            ITEMS.Add('ynb');
+            ITEMS.Add('mgb');
+            ITEMS.Add('sgb');
+            ITEMS.Add('wgb');
+            ITEMS.Add('fgb');
+            Caption := 'Soul Wars'; //Default Bank
+          end;
+        end;
+      Width := 80;
+    end;
   end;
 
 {---------------------------------- TButton -----------------------------------}
-  TempArr := ['Start', 'Stop'];
-  for I := 0 to 1 do
+  HintArr := ['Save data and start the script.', 'Exit without Saving.', 'Save Data. Data saves to C:/Simba/Saved data/Tickyy super heater.ini', 'Load Saved Data.'];
+  TempArr := ['Start', 'Exit','Save', 'Load'];
+  for I := 0 to 3 do
   begin
     TBut[i] := TBUTTON.Create(Form);
     with TBut[i] do
     begin
       Parent := Form;
-      Top := 300;
-      Left := i * 100 + 20;
+      Hint := HintArr[i];
+      if InIntArray([0,1], i) then
+      begin
+        Top := 315;
+        Left := i * 100 + 20;
+      end else
+      begin
+        Top := 280;
+        Left := (i - 2) * 100 + 20;
+      end;
       Caption := Temparr[i];
       ONCLICK := @Action;
     end;
@@ -135,10 +267,11 @@ begin
   with TBG do
   begin
     Parent := Form;
-    Width := 550;
-    Height := 340;
+    Width := 420;
+    Height := 365;
     Top := 0;
     Left := 0;
+    Hint := 'Form Created by BraK';
   end;
   B := LoadBitmap(ScriptPath + 'BackGround.bmp');
   GetBitmapSize(B, W, H);
@@ -149,31 +282,15 @@ begin
   with Banner do
   begin
     Parent := Form;
-
-    Width := 429;
+    Hint := 'Super Heater by Tickyy';
+    Width := 394;
     Height := 91;
     Top := 10;
-    Left := 10;
+    Left := 18;
   end;
-
   B := LoadBitmap(ScriptPath + 'TGxgP.jpg');
   GetBitmapSize(B, W, H);
   DrawBitmap(B, Banner.CANVAS,0,0);
-  FreeBitmap(b);
-
-
-  Hat := TIMAGE.Create(Form);
-  with Hat do
-  begin
-    Parent := Form;
-    Width := 95;
-    Height := 90;
-    Top := 10;
-    Left := 445;
-  end;
-  B := LoadBitmap(ScriptPath + 'Magic.gif');
-  GetBitmapSize(B, W, H);
-  DrawBitmap(B,Hat.CANVAS,0,0);
   FreeBitmap(b);
 
   form.showModal;
@@ -192,7 +309,7 @@ begin
   Form.Free();
 end;
 
-
+Procedure UseForm;
 begin
   clearDebug();
   try
@@ -202,4 +319,12 @@ begin
   finally
     formSafeCall('formFree');
   end;
+  if Form.MODALRESULT = 1 then
+    exit
+  else
+    TerminateScript;
+end;
+
+begin
+  UseForm;
 end.
